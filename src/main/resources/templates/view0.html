@@ -23,6 +23,9 @@
 								th:field="*{username}" 
 								placeholder="Please type in your username" >
 					</td>
+					<td>
+						<span th:if="${#fields.hasErrors()}" th:errors="*{username}"></span>
+					</td>
 				</tr>
 				<tr>
 					<td>
@@ -32,6 +35,9 @@
 						<input type="password" id="password" size="30"
 								th:field="*{password}" 
 								placeholder="Please type in your password">
+					</td>
+					<td>
+						<span th:if="${#fields.hasErrors()}" th:errors="*{password}"></span>
 					</td>
 				</tr>
 				<tr>
