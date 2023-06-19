@@ -48,6 +48,7 @@ public class FrontController {
 	@PostMapping(path = "/login", consumes="application/x-www-form-urlencoded", produces="text/html")
 	public String postAuthenticate(@Valid User user, BindingResult binding, Model model, HttpSession session, Captcha captcha) {
 
+		// check for validation errors, does not increase login attempts
 		if (binding.hasErrors())
 			return "view0";
 
@@ -56,13 +57,22 @@ public class FrontController {
 		if (login == null)
 			login = new Login();
 
+		// check if username is disabled
+		if (authService.isLocked(user.getUsername()))
+			return "view2";
+
+		// check for captcha answer if it is not the first login attempt
 		if (login.getLoginAttempts() > 0) {
+			
 			Captcha sessionCaptcha = (Captcha) session.getAttribute("captcha");
 
 			if (captcha.getAnswer() != sessionCaptcha.getResult()) {
 
 				login.setLoginAttempts(login.getLoginAttempts() + 1);
-				System.out.println(login.getLoginAttempts());
+				System.out.println("Login Attempts: " + login.getLoginAttempts());
+
+				if (login.getLoginAttempts() >= 3) 
+					authService.disableUser(user.getUsername());
 
 				session.setAttribute("login", login);
 				model.addAttribute("loginAttempts", login.getLoginAttempts());
@@ -73,7 +83,7 @@ public class FrontController {
 			}
 		}
 
-
+		// authenticate username and password with external api
 		try {
 			authService.authenticate(user.getUsername(), user.getPassword());
 		} catch (Exception e) {
@@ -83,23 +93,28 @@ public class FrontController {
 				HttpClientErrorException ex = (HttpClientErrorException) e;
 				System.out.println(ex.getStatusCode().toString());
 
-				if (ex.getStatusCode().equals(HttpStatus.BAD_REQUEST) ||
-						ex.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
-
-					if (ex.getStatusCode().equals(HttpStatus.BAD_REQUEST)) {
-						model.addAttribute("error", "Invalid payload");
-					} else {
-						model.addAttribute("error", "Incorrect username and/or password");
-					}
+				if (!ex.getStatusCode().equals(HttpStatus.BAD_REQUEST) ||
+						!ex.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
 					
-					login.setLoginAttempts(login.getLoginAttempts() + 1);
-					System.out.println(login.getLoginAttempts());
-
-					session.setAttribute("login", login);
-					model.addAttribute("loginAttempts", login.getLoginAttempts());
-					session.setAttribute("captcha", new Captcha());
-					model.addAttribute("captcha", session.getAttribute("captcha"));
+					return "view0";
 				}
+
+				if (ex.getStatusCode().equals(HttpStatus.BAD_REQUEST)) {
+					model.addAttribute("error", "Invalid payload");
+				} else {
+					model.addAttribute("error", "Incorrect username and/or password");
+				}
+				
+				login.setLoginAttempts(login.getLoginAttempts() + 1);
+				System.out.println("Login Attempts: " + login.getLoginAttempts());
+
+				if (login.getLoginAttempts() >= 3) 
+					authService.disableUser(user.getUsername());
+
+				session.setAttribute("login", login);
+				model.addAttribute("loginAttempts", login.getLoginAttempts());
+				session.setAttribute("captcha", new Captcha());
+				model.addAttribute("captcha", session.getAttribute("captcha"));
 
 				return "view0";
 			}
