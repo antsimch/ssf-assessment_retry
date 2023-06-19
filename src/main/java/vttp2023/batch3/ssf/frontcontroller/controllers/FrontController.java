@@ -63,7 +63,7 @@ public class FrontController {
 
 		// check for captcha answer if it is not the first login attempt
 		if (login.getLoginAttempts() > 0) {
-			
+
 			Captcha sessionCaptcha = (Captcha) session.getAttribute("captcha");
 
 			if (captcha.getAnswer() != sessionCaptcha.getResult()) {
@@ -71,9 +71,10 @@ public class FrontController {
 				login.setLoginAttempts(login.getLoginAttempts() + 1);
 				System.out.println("Login Attempts: " + login.getLoginAttempts());
 
-				if (login.getLoginAttempts() >= 3) 
+				if (login.getLoginAttempts() >= 3)
 					authService.disableUser(user.getUsername());
-
+				
+				model.addAttribute("error", "Incorrect answer for captcha");
 				session.setAttribute("login", login);
 				model.addAttribute("loginAttempts", login.getLoginAttempts());
 				session.setAttribute("captcha", new Captcha());
@@ -85,7 +86,10 @@ public class FrontController {
 
 		// authenticate username and password with external api
 		try {
+
 			authService.authenticate(user.getUsername(), user.getPassword());
+			login.setAuthenticated(true);
+
 		} catch (Exception e) {
 
 			if (e instanceof HttpClientErrorException) {
@@ -93,7 +97,7 @@ public class FrontController {
 				HttpClientErrorException ex = (HttpClientErrorException) e;
 				System.out.println(ex.getStatusCode().toString());
 
-				if (!ex.getStatusCode().equals(HttpStatus.BAD_REQUEST) ||
+				if (!ex.getStatusCode().equals(HttpStatus.BAD_REQUEST) &&
 						!ex.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
 					
 					return "view0";
@@ -120,6 +124,6 @@ public class FrontController {
 			}
 		}
 			
-		return "protected/view1";
+		return "/protected/view1";
 	}
 }

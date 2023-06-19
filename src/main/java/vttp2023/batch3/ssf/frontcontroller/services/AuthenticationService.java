@@ -24,9 +24,6 @@ public class AuthenticationService {
 	// Write the authentication method in here
 	public void authenticate(String username, String password) throws Exception {
 
-		System.out.println(username);
-		System.out.println(password);
-
 		String authUrl = "https://authservice-production-e8b2.up.railway.app/api/authenticate";
 
 		JsonObject obj = Json.createObjectBuilder()
