@@ -1,17 +1,18 @@
 package vttp2023.batch3.ssf.frontcontroller.model;
 
-public class Login {
-    
-    private User user;
+import java.io.Serializable;
 
+public class Login implements Serializable {
+
+    private User user;
+    
     private boolean authenticated;
 
-    public Login() {
-    }
+    private int loginAttempts;
 
-    public Login(User user, boolean authenticated) {
-        this.user = user;
-        this.authenticated = authenticated;
+    public Login() {
+        this.authenticated = false;
+        this.loginAttempts = 0;
     }
 
     public User getUser() {
@@ -21,6 +22,22 @@ public class Login {
     public void setUser(User user) {
         this.user = user;
     }
+    
+    public String getUserUsername() {
+        return user.getUsername();
+    }
+
+    public void setUserUsername(String username) {
+        this.user.setUsername(username);
+    }
+
+    public String getUserPassword() {
+        return user.getPassword();
+    }
+
+    public void setUserPassword(String password) {
+        this.user.setPassword(password);
+    }
 
     public boolean isAuthenticated() {
         return authenticated;
@@ -28,5 +45,13 @@ public class Login {
 
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
+    }
+
+    public int getLoginAttempts() {
+        return loginAttempts;
+    }
+
+    public void setLoginAttempts(int loginAttempts) {
+        this.loginAttempts = loginAttempts;
     }
 }

@@ -1,12 +1,9 @@
 package vttp2023.batch3.ssf.frontcontroller.services;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import jakarta.json.Json;
@@ -19,6 +16,9 @@ public class AuthenticationService {
 	// DO NOT CHANGE THE METHOD'S SIGNATURE
 	// Write the authentication method in here
 	public void authenticate(String username, String password) throws Exception {
+
+		System.out.println(username);
+		System.out.println(password);
 
 		String authUrl = "https://authservice-production-e8b2.up.railway.app/api/authenticate";
 
